@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @EnvironmentObject var viewModel: GoalsViewModel
+    @EnvironmentObject var viewModel: AppViewModel
     @State private var reminderTime: Date
 
     init() {
@@ -34,6 +34,6 @@ struct SettingsView: View {
 #Preview {
     NavigationStack {
         SettingsView()
-            .environmentObject(GoalsViewModel())
+            .environmentObject(AppViewModel())
     }
 }

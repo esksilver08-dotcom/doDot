@@ -1,8 +1,10 @@
 # doDot (mailmeil)
 
-A native iOS app for tracking daily goals and their sub-tasks ("routines").
-SwiftUI + Swift Testing, no external dependencies or package manager —
-everything lives in the single `mailmeil.xcodeproj`.
+A native iOS app for gamified daily productivity: todos (split into
+morning/afternoon/evening), important one-off events, and recurring
+routines all feed XP into a leveling-up character. SwiftUI + Swift Testing,
+no external dependencies or package manager — everything lives in the
+single `mailmeil.xcodeproj`.
 
 ## Commands
 
@@ -38,40 +40,51 @@ for seeing UI changes without a local Mac.
 
 ```
 mailmeil/
-  mailmeilApp.swift          # @main entry point, wires GoalsViewModel in
-  ContentView.swift
-  Item.swift                 # Item: a single todo/routine entry (Codable struct)
+  mailmeilApp.swift          # @main entry point: TabView (오늘/루틴/캐릭터)
   Models/
-    Goal.swift                # Goal: a tracked goal, owns its todos (Codable class)
+    PlayerCharacter.swift     # level + XP, addXP/removeXP (named to avoid
+                               # shadowing Swift's built-in Character type)
+    TodoItem.swift             # TodoItem + Difficulty (XP value) + TimeOfDay enums
+    ImportantEvent.swift       # dated event shown alongside today's todos
+    Routine.swift               # recurring task; "done today" is derived from
+                               # lastCompletedDate, not a separately-reset flag
   ViewModels/
-    GoalsViewModel.swift      # ObservableObject: CRUD, daily reset, JSON persistence
+    AppViewModel.swift         # single source of truth: character, todos,
+                               # events, routines; JSON persistence; awards/
+                               # revokes XP on toggle; reschedules the
+                               # reminder notification on every save
   Views/
-    GoalsHomeView.swift       # top-level list of goals
-    GoalCardView.swift
-    GoalDetailView.swift
-    GoalsTodoListView.swift
-    AddGoalView.swift / EditGoalView.swift
-    AddTodoInputView.swift / EditTodoView.swift
-    Color+Extension.swift
+    TodayView.swift             # 오늘 tab: important events + todos by time of day
+    AddTodoView.swift / AddEventView.swift
+    RoutineView.swift           # 루틴 tab: today's recurring routines
+    AddRoutineView.swift
+    CharacterView.swift         # 캐릭터 tab: level + XP bar
+    SettingsView.swift          # reminder time picker
+  Services/
+    NotificationManager.swift   # local "N routines left today" reminder,
+                               # user-configurable time (UserDefaults)
 mailmeilTests/                # Swift Testing (`@Test`) unit tests
 mailmeilUITests/               # XCUITest UI tests
 ```
 
 ## Architecture
 
-- **Persistence**: `GoalsViewModel` serializes `[Goal]` to a `goals.json` file
-  in the app's Documents directory (see `saveToDisk`/`loadFromDisk`) — despite
-  the `import SwiftData` in `GoalsViewModel.swift`, SwiftData is not actually
-  used for storage. There's no `ModelContainer`/`@Model` anywhere in the app.
-- **`Goal`** is a reference type (`class`, `ObservableObject`) with
-  `@Published` arrays (`baseTodos`, `todos`, `completedHistory`,
-  `deletedContents`). `Item` is a plain `Codable`/`Equatable` value struct.
-- **Daily repeat logic**: goals marked `isDailyRepeat` keep a `baseTodos`
-  template; `GoalsViewModel.resetDailyGoalsIfNeeded()` (called on launch)
-  regenerates the day's `todos` from that template based on `repeatDays`
-  (0–6, day-of-week) and `lastResetDate`.
-- **Views** are one SwiftUI file per screen/component under `Views/`,
-  driven by `@EnvironmentObject var GoalsViewModel` injected at the app root.
+- **Persistence**: `AppViewModel` serializes character/todos/events/routines
+  to a single `appstate.json` file in the app's Documents directory
+  (`save`/`loadFromDisk`). No SwiftData/CoreData.
+- **XP flow**: completing a todo or a routine calls
+  `PlayerCharacter.addXP(_:)` with the item's `Difficulty.xp` (쉬움=10,
+  보통=30, 어려움=50); un-completing calls `removeXP(_:)` to reverse it.
+  Leveling is a flat `xpPerLevel = 100` per level — no escalating curve yet.
+- **Todos** (`TodoItem`) are one-off, dated (`date`), and shown for "today"
+  only (`AppViewModel.todaysTodos`), split into `.morning`/`.afternoon`/`.evening`.
+- **Routines** repeat on selected weekdays (`repeatDays`, 0=Monday...6=Sunday,
+  see `AppViewModel.todayWeekdayIndex()`). Whether one is done "today" is
+  derived from `lastCompletedDate` rather than a stored flag that needs an
+  explicit daily reset — toggling just sets/clears that date.
+- **Reminder**: `AppViewModel.updateDailyReminder()` runs after every save,
+  counting today's incomplete todos + routines and asking
+  `NotificationManager` to reschedule (or cancel, if nothing's left).
 
 ## Conventions
 
