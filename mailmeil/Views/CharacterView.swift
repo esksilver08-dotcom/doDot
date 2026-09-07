@@ -2,14 +2,22 @@ import SwiftUI
 
 struct CharacterView: View {
     @EnvironmentObject var viewModel: AppViewModel
+    @AppStorage("avatarChoice") private var avatarChoiceRaw = AvatarChoice.girl.rawValue
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    PixelAvatarView(level: viewModel.character.level)
-                        .frame(width: 120, height: 160)
-                        .padding(.top, 24)
+                    CharacterAvatarView(level: viewModel.character.level)
+                        .padding(.top, 16)
+
+                    Picker("캐릭터", selection: $avatarChoiceRaw) {
+                        ForEach(AvatarChoice.allCases) { choice in
+                            Text(choice.label).tag(choice.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 60)
 
                     Text("Lv. \(viewModel.character.level)")
                         .font(.largeTitle.bold())

@@ -59,7 +59,8 @@ mailmeil/
     RoutineView.swift           # 루틴 tab: today's recurring routines
     AddRoutineView.swift
     CharacterView.swift         # 캐릭터 tab: level + XP bar + stats + history link
-    PixelAvatarView.swift       # procedural pixel-art sprite, no image assets
+    CharacterAvatarView.swift   # chibi student illustration (AvatarGirl/AvatarBoy
+                               # assets) + level-tiered glow ring + crown at Lv.10+
     LevelUpOverlayView.swift    # confetti celebration shown on level-up
     HistoryCalendarView.swift   # month calendar of completion history
     SettingsView.swift          # reminder time picker
@@ -88,6 +89,12 @@ mailmeilUITests/               # XCUITest UI tests
 - **Reminder**: `AppViewModel.updateDailyReminder()` runs after every save,
   counting today's incomplete todos + routines and asking
   `NotificationManager` to reschedule (or cancel, if nothing's left).
+- **Avatar**: two chibi-student illustrations (`AvatarGirl`/`AvatarBoy` in
+  Assets.xcassets) stand in for a full per-level sprite set — the user picks
+  one in a segmented control on the 캐릭터 tab (`avatarChoice` in
+  UserDefaults via `@AppStorage`, shared with `CharacterAvatarView`), and
+  level growth shows as a tiered glow ring color + a crown at level 10+
+  rather than a redrawn character.
 - **Level-up celebration**: `PlayerCharacter.addXP(_:)` returns how many
   levels were gained; `AppViewModel` turns a nonzero result into a
   `levelUpEvent`, shown as a confetti overlay (`LevelUpOverlayView`) at the
