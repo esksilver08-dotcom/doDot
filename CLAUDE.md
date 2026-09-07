@@ -58,7 +58,10 @@ mailmeil/
     AddTodoView.swift / AddEventView.swift
     RoutineView.swift           # 루틴 tab: today's recurring routines
     AddRoutineView.swift
-    CharacterView.swift         # 캐릭터 tab: level + XP bar
+    CharacterView.swift         # 캐릭터 tab: level + XP bar + stats + history link
+    PixelAvatarView.swift       # procedural pixel-art sprite, no image assets
+    LevelUpOverlayView.swift    # confetti celebration shown on level-up
+    HistoryCalendarView.swift   # month calendar of completion history
     SettingsView.swift          # reminder time picker
   Services/
     NotificationManager.swift   # local "N routines left today" reminder,
@@ -85,6 +88,13 @@ mailmeilUITests/               # XCUITest UI tests
 - **Reminder**: `AppViewModel.updateDailyReminder()` runs after every save,
   counting today's incomplete todos + routines and asking
   `NotificationManager` to reschedule (or cancel, if nothing's left).
+- **Level-up celebration**: `PlayerCharacter.addXP(_:)` returns how many
+  levels were gained; `AppViewModel` turns a nonzero result into a
+  `levelUpEvent`, shown as a confetti overlay (`LevelUpOverlayView`) at the
+  app root (`mailmeilApp.swift`) so it appears regardless of which tab
+  triggered it.
+- **App display name**: `INFOPLIST_KEY_CFBundleDisplayName` is `doDot`
+  (English) in the Xcode build settings.
 
 ## Conventions
 

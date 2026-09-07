@@ -25,6 +25,10 @@ struct CharacterView: View {
 
                     statsCard
                         .padding(.horizontal, 24)
+
+                    NavigationLink(destination: HistoryCalendarView()) {
+                        Label("히스토리 보기", systemImage: "calendar")
+                    }
                 }
                 .padding(.bottom, 24)
             }

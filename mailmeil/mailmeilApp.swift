@@ -28,6 +28,15 @@ struct mailmeilApp: App {
                     }
             }
             .environmentObject(viewModel)
+            .overlay {
+                if let event = viewModel.levelUpEvent {
+                    LevelUpOverlayView(newLevel: event.newLevel) {
+                        viewModel.levelUpEvent = nil
+                    }
+                    .transition(.opacity)
+                    .zIndex(1)
+                }
+            }
         }
     }
 }

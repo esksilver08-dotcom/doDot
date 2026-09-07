@@ -1,12 +1,20 @@
 import Foundation
 import SwiftUI
 
+/// Fired transiently when `addXP` crosses a level boundary, so a view can
+/// show a one-off celebration. Not persisted.
+struct LevelUpEvent: Identifiable, Equatable {
+    let id = UUID()
+    let newLevel: Int
+}
+
 final class AppViewModel: ObservableObject {
     @Published var character = PlayerCharacter()
     @Published var todos: [TodoItem] = []
     @Published var events: [ImportantEvent] = []
     @Published var routines: [Routine] = []
     @Published var completionLog: [CompletionLogEntry] = []
+    @Published var levelUpEvent: LevelUpEvent?
 
     private var saveURL: URL {
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -37,7 +45,10 @@ final class AppViewModel: ObservableObject {
         guard let index = todos.firstIndex(where: { $0.id == id }) else { return }
         todos[index].isCompleted.toggle()
         if todos[index].isCompleted {
-            character.addXP(todos[index].difficulty.xp)
+            let levelsGained = character.addXP(todos[index].difficulty.xp)
+            if levelsGained > 0 {
+                levelUpEvent = LevelUpEvent(newLevel: character.level)
+            }
             logCompletion()
         } else {
             character.removeXP(todos[index].difficulty.xp)
@@ -99,7 +110,10 @@ final class AppViewModel: ObservableObject {
             undoTodaysCompletionLog()
         } else {
             routines[index].lastCompletedDate = Date()
-            character.addXP(routines[index].difficulty.xp)
+            let levelsGained = character.addXP(routines[index].difficulty.xp)
+            if levelsGained > 0 {
+                levelUpEvent = LevelUpEvent(newLevel: character.level)
+            }
             logCompletion()
         }
         save()
