@@ -11,6 +11,7 @@ class GoalsViewModel: ObservableObject {
     }
 
     init() {
+        NotificationManager.shared.requestAuthorizationIfNeeded()
         loadFromDisk()
         resetDailyGoalsIfNeeded()
     }
@@ -200,6 +201,14 @@ class GoalsViewModel: ObservableObject {
         } catch {
             print("❌ Failed to save goals:", error)
         }
+        updateDailyReminder()
+    }
+
+    private func updateDailyReminder() {
+        let incompleteCount = goals.reduce(0) { count, goal in
+            count + goal.todos.filter { !$0.isCompleted }.count
+        }
+        NotificationManager.shared.scheduleDailyReminder(incompleteCount: incompleteCount)
     }
 
     private func loadFromDisk() {
