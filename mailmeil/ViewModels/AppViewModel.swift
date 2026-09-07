@@ -6,6 +6,7 @@ final class AppViewModel: ObservableObject {
     @Published var todos: [TodoItem] = []
     @Published var events: [ImportantEvent] = []
     @Published var routines: [Routine] = []
+    @Published var completionLog: [CompletionLogEntry] = []
 
     private var saveURL: URL {
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -37,8 +38,10 @@ final class AppViewModel: ObservableObject {
         todos[index].isCompleted.toggle()
         if todos[index].isCompleted {
             character.addXP(todos[index].difficulty.xp)
+            logCompletion()
         } else {
             character.removeXP(todos[index].difficulty.xp)
+            undoTodaysCompletionLog()
         }
         save()
     }
@@ -93,9 +96,11 @@ final class AppViewModel: ObservableObject {
         if isCompletedToday(routines[index]) {
             routines[index].lastCompletedDate = nil
             character.removeXP(routines[index].difficulty.xp)
+            undoTodaysCompletionLog()
         } else {
             routines[index].lastCompletedDate = Date()
             character.addXP(routines[index].difficulty.xp)
+            logCompletion()
         }
         save()
     }
@@ -103,6 +108,46 @@ final class AppViewModel: ObservableObject {
     func deleteRoutine(_ id: UUID) {
         routines.removeAll { $0.id == id }
         save()
+    }
+
+    // MARK: - Completion log & stats
+
+    private func logCompletion() {
+        completionLog.append(CompletionLogEntry())
+    }
+
+    /// Best-effort undo for an un-check: removes the most recent entry from
+    /// today, since completions aren't individually tagged by source item.
+    private func undoTodaysCompletionLog() {
+        if let index = completionLog.lastIndex(where: { Calendar.current.isDateInToday($0.date) }) {
+            completionLog.remove(at: index)
+        }
+    }
+
+    /// Lifetime XP implied by the character's current level/XP (no separate
+    /// ledger needed — leveling is a flat `xpPerLevel` per level).
+    var totalXPEarned: Int {
+        (character.level - 1) * PlayerCharacter.xpPerLevel + character.currentXP
+    }
+
+    var thisWeekCompletions: Int {
+        let calendar = Calendar.current
+        guard let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start else { return 0 }
+        return completionLog.filter { $0.date >= weekStart }.count
+    }
+
+    /// Consecutive days up to and including today with at least one completion.
+    var currentStreakDays: Int {
+        let calendar = Calendar.current
+        let completedDays = Set(completionLog.map { calendar.startOfDay(for: $0.date) })
+        var streak = 0
+        var cursor = calendar.startOfDay(for: Date())
+        while completedDays.contains(cursor) {
+            streak += 1
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: cursor) else { break }
+            cursor = previousDay
+        }
+        return streak
     }
 
     // MARK: - Reminder
@@ -120,10 +165,31 @@ final class AppViewModel: ObservableObject {
         var todos: [TodoItem]
         var events: [ImportantEvent]
         var routines: [Routine]
+        var completionLog: [CompletionLogEntry]
+
+        init(character: PlayerCharacter, todos: [TodoItem], events: [ImportantEvent], routines: [Routine], completionLog: [CompletionLogEntry]) {
+            self.character = character
+            self.todos = todos
+            self.events = events
+            self.routines = routines
+            self.completionLog = completionLog
+        }
+
+        // Explicit so old saved data (from before completionLog existed)
+        // still decodes instead of failing on the missing key — a synthesized
+        // Decodable would require the key even with a default property value.
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            character = try container.decode(PlayerCharacter.self, forKey: .character)
+            todos = try container.decode([TodoItem].self, forKey: .todos)
+            events = try container.decode([ImportantEvent].self, forKey: .events)
+            routines = try container.decode([Routine].self, forKey: .routines)
+            completionLog = try container.decodeIfPresent([CompletionLogEntry].self, forKey: .completionLog) ?? []
+        }
     }
 
     private func save() {
-        let data = AppData(character: character, todos: todos, events: events, routines: routines)
+        let data = AppData(character: character, todos: todos, events: events, routines: routines, completionLog: completionLog)
         do {
             let encoded = try JSONEncoder().encode(data)
             try encoded.write(to: saveURL)
@@ -141,6 +207,7 @@ final class AppViewModel: ObservableObject {
             todos = data.todos
             events = data.events
             routines = data.routines
+            completionLog = data.completionLog
         } catch {
             print("ℹ️ No saved app data yet:", error)
         }
