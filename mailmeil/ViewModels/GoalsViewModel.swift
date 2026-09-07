@@ -204,7 +204,7 @@ class GoalsViewModel: ObservableObject {
         updateDailyReminder()
     }
 
-    private func updateDailyReminder() {
+    func updateDailyReminder() {
         let incompleteCount = goals.reduce(0) { count, goal in
             count + goal.todos.filter { !$0.isCompleted }.count
         }

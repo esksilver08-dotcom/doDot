@@ -9,8 +9,20 @@ final class NotificationManager {
     private init() {}
 
     private let reminderIdentifier = "daily-routine-check"
-    private let reminderHour = 21
-    private let reminderMinute = 0
+    private let reminderHourKey = "reminderHour"
+    private let reminderMinuteKey = "reminderMinute"
+
+    /// User-configurable reminder time, defaulting to 21:00. Persisted in
+    /// UserDefaults so SettingsView can read/write it directly.
+    var reminderHour: Int {
+        get { (UserDefaults.standard.object(forKey: reminderHourKey) as? Int) ?? 21 }
+        set { UserDefaults.standard.set(newValue, forKey: reminderHourKey) }
+    }
+
+    var reminderMinute: Int {
+        get { (UserDefaults.standard.object(forKey: reminderMinuteKey) as? Int) ?? 0 }
+        set { UserDefaults.standard.set(newValue, forKey: reminderMinuteKey) }
+    }
 
     func requestAuthorizationIfNeeded() {
         let center = UNUserNotificationCenter.current()

@@ -93,6 +93,11 @@ struct GoalsHomeView: View {
             }
             .navigationTitle("나의 목표")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gearshape")
+                    }
+                }
                 if !viewModel.goals.isEmpty {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         HStack {
