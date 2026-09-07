@@ -92,9 +92,11 @@ mailmeilUITests/               # XCUITest UI tests
 - **Avatar**: two chibi-student illustrations (`AvatarGirl`/`AvatarBoy` in
   Assets.xcassets) stand in for a full per-level sprite set — the user picks
   one in a segmented control on the 캐릭터 tab (`avatarChoice` in
-  UserDefaults via `@AppStorage`, shared with `CharacterAvatarView`), and
-  level growth shows as a tiered glow ring color + a crown at level 10+
-  rather than a redrawn character.
+  UserDefaults via `@AppStorage`, shared with `CharacterAvatarView`). Growth
+  reads as "studying harder" rather than a redrawn character: `studyTier(for:)`
+  maps level to a glow color, a desk-prop badge (📖 → 📚✏️ → 📚🔥), and a
+  caption (새싹 학습자 → 집중 모드 → 열공 모드 → 학습 마스터), plus a crown
+  at level 10+.
 - **Level-up celebration**: `PlayerCharacter.addXP(_:)` returns how many
   levels were gained; `AppViewModel` turns a nonzero result into a
   `levelUpEvent`, shown as a confetti overlay (`LevelUpOverlayView`) at the
