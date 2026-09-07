@@ -23,6 +23,17 @@ Or open `mailmeil.xcodeproj` in Xcode and use Cmd+R / Cmd+U.
 
 Deployment target: iOS 18.2. Swift 5.
 
+A shared scheme (`mailmeil.xcodeproj/xcshareddata/xcschemes/mailmeil.xcscheme`)
+is checked in so `-scheme mailmeil` works on a clean checkout (CI included) —
+without it, only whatever user-specific scheme Xcode auto-generates locally
+would exist, and `xcodebuild` would fail to find one on a fresh clone.
+
+## CI
+
+`.github/workflows/screenshots.yml` builds the app for the simulator on every
+push, launches it, and uploads a screenshot as a workflow artifact — useful
+for seeing UI changes without a local Mac.
+
 ## Project structure
 
 ```
