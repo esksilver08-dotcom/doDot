@@ -59,8 +59,8 @@ mailmeil/
     RoutineView.swift           # 루틴 tab: today's recurring routines
     AddRoutineView.swift
     CharacterView.swift         # 캐릭터 tab: level + XP bar + stats + history link
-    CharacterAvatarView.swift   # chibi student illustration (AvatarGirl/AvatarBoy
-                               # assets) + level-tiered glow ring + crown at Lv.10+
+    CharacterAvatarView.swift   # level -> one of 7 StudyStage illustrations
+                               # (Assets.xcassets), each its own drawn artwork
     LevelUpOverlayView.swift    # confetti celebration shown on level-up
     HistoryCalendarView.swift   # month calendar of completion history
     SettingsView.swift          # reminder time picker
@@ -89,14 +89,13 @@ mailmeilUITests/               # XCUITest UI tests
 - **Reminder**: `AppViewModel.updateDailyReminder()` runs after every save,
   counting today's incomplete todos + routines and asking
   `NotificationManager` to reschedule (or cancel, if nothing's left).
-- **Avatar**: two chibi-student illustrations (`AvatarGirl`/`AvatarBoy` in
-  Assets.xcassets) stand in for a full per-level sprite set — the user picks
-  one in a segmented control on the 캐릭터 tab (`avatarChoice` in
-  UserDefaults via `@AppStorage`, shared with `CharacterAvatarView`). Growth
-  reads as "studying harder" rather than a redrawn character: `studyTier(for:)`
-  maps level to a glow color, a desk-prop badge (📖 → 📚✏️ → 📚🔥), and a
-  caption (새싹 학습자 → 집중 모드 → 열공 모드 → 학습 마스터), plus a crown
-  at level 10+.
+- **Avatar**: a real 7-stage illustration set (`StudyStage1`...`StudyStage7`
+  in Assets.xcassets — cropped from one commissioned grid image, one panel
+  per stage) drawn specifically for this progression: 공부 허수 → 학습
+  입문자 → 학구적 몰입 → 지식 체계화 → 학문 융합가 → 탐구의 완성 → 학문의
+  초월자. `CharacterAvatarView`'s private `studyStage(for:)` maps level to a
+  stage (2 levels per stage from level 2 on, capped at stage 7 from level 12),
+  so leveling up actually swaps the artwork rather than re-tinting one image.
 - **Level-up celebration**: `PlayerCharacter.addXP(_:)` returns how many
   levels were gained; `AppViewModel` turns a nonzero result into a
   `levelUpEvent`, shown as a confetti overlay (`LevelUpOverlayView`) at the

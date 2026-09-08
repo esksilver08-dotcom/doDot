@@ -1,103 +1,52 @@
 import SwiftUI
 
-enum AvatarChoice: String, CaseIterable, Identifiable {
-    case girl = "AvatarGirl"
-    case boy = "AvatarBoy"
-
-    var id: String { rawValue }
-    var label: String {
-        switch self {
-        case .girl: return "여학생"
-        case .boy: return "남학생"
-        }
-    }
-}
-
-/// How hard the character is studying, purely a function of level. Stands in
-/// for a full per-level sprite set: same illustration throughout, but the
-/// glow, desk-prop badge, and caption escalate from "just starting out" to
-/// "burning the midnight oil".
-private struct StudyTier {
+/// Level → study-progression stage, matching the 7-illustration set:
+/// 공부 허수 → 학습 입문자 → 학구적 몰입 → 지식 체계화 → 학문 융합가 →
+/// 탐구의 완성 → 학문의 초월자. Each stage is its own drawn illustration
+/// (`StudyStage1`...`StudyStage7` in Assets.xcassets), so leveling up
+/// actually swaps the artwork instead of just re-tinting one image.
+private struct StudyStage {
+    let number: Int
     let label: String
-    let glowColor: Color
-    let props: [String]
 }
 
-private func studyTier(for level: Int) -> StudyTier {
+private func studyStage(for level: Int) -> StudyStage {
     switch level {
-    case ..<3:
-        return StudyTier(label: "새싹 학습자", glowColor: .blue, props: [])
-    case 3..<6:
-        return StudyTier(label: "집중 모드", glowColor: .yellow, props: ["📖"])
-    case 6..<10:
-        return StudyTier(label: "열공 모드", glowColor: .orange, props: ["📚", "✏️"])
-    default:
-        return StudyTier(label: "학습 마스터", glowColor: .red, props: ["📚", "🔥"])
+    case 1: return StudyStage(number: 1, label: "공부 허수")
+    case 2...3: return StudyStage(number: 2, label: "학습 입문자")
+    case 4...5: return StudyStage(number: 3, label: "학구적 몰입")
+    case 6...7: return StudyStage(number: 4, label: "지식 체계화")
+    case 8...9: return StudyStage(number: 5, label: "학문 융합가")
+    case 10...11: return StudyStage(number: 6, label: "탐구의 완성")
+    default: return StudyStage(number: 7, label: "학문의 초월자")
     }
 }
 
 struct CharacterAvatarView: View {
     let level: Int
-    @AppStorage("avatarChoice") private var avatarChoiceRaw = AvatarChoice.girl.rawValue
 
-    private var avatarChoice: AvatarChoice {
-        AvatarChoice(rawValue: avatarChoiceRaw) ?? .girl
-    }
-
-    private var hasCrown: Bool { level >= 10 }
-    private var tier: StudyTier { studyTier(for: level) }
+    private var stage: StudyStage { studyStage(for: level) }
 
     var body: some View {
-        VStack(spacing: 6) {
-            ZStack(alignment: .top) {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [tier.glowColor.opacity(0.4), tier.glowColor.opacity(0)],
-                            center: .center, startRadius: 10, endRadius: 90
-                        )
-                    )
-                    .frame(width: 180, height: 180)
+        VStack(spacing: 8) {
+            Image("StudyStage\(stage.number)")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 220, height: 148)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
 
-                Image(avatarChoice.rawValue)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 140, height: 160)
-                    .offset(y: 8)
-
-                if hasCrown {
-                    Text("👑")
-                        .font(.system(size: 34))
-                        .offset(y: -10)
-                }
-
-                if !tier.props.isEmpty {
-                    HStack(spacing: -2) {
-                        ForEach(tier.props, id: \.self) { prop in
-                            Text(prop).font(.system(size: 20))
-                        }
-                    }
-                    .padding(6)
-                    .background(Color(.systemBackground).opacity(0.9))
-                    .clipShape(Capsule())
-                    .shadow(color: .black.opacity(0.1), radius: 3, y: 1)
-                    .offset(x: 55, y: 128)
-                }
-            }
-            .frame(height: 168)
-
-            Text(tier.label)
+            Text("\(stage.number)단계 · \(stage.label)")
                 .font(.caption.bold())
-                .foregroundColor(tier.glowColor)
+                .foregroundColor(.secondary)
         }
     }
 }
 
 #Preview {
-    VStack(spacing: 20) {
-        CharacterAvatarView(level: 1)
-        CharacterAvatarView(level: 4)
-        CharacterAvatarView(level: 8)
-        CharacterAvatarView(level: 12)
+    VStack(spacing: 16) {
+        ForEach([1, 3, 5, 7, 9, 11, 13], id: \.self) { lv in
+            CharacterAvatarView(level: lv)
+        }
     }
 }
