@@ -96,6 +96,10 @@ mailmeilUITests/               # XCUITest UI tests
   초월자. `CharacterAvatarView`'s private `studyStage(for:)` maps level to a
   stage (2 levels per stage from level 2 on, capped at stage 7 from level 12),
   so leveling up actually swaps the artwork rather than re-tinting one image.
+  The source crop is only ~445px wide — each imageset's @1x/@2x/@3x are real
+  half/native/1.5x-upscaled-and-sharpened variants of it (not the same file
+  three times), since assigning identical pixels to all three scales made
+  the art render soft on 3x devices.
 - **Level-up celebration**: `PlayerCharacter.addXP(_:)` returns how many
   levels were gained; `AppViewModel` turns a nonzero result into a
   `levelUpEvent`, shown as a confetti overlay (`LevelUpOverlayView`) at the
