@@ -10,17 +10,26 @@ struct CharacterView: View {
                     CharacterAvatarView(level: viewModel.character.level)
                         .padding(.top, 16)
 
-                    Text("Lv. \(viewModel.character.level)")
-                        .font(.largeTitle.bold())
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        ProgressView(value: viewModel.character.progress)
-                            .tint(.accentColor)
-                        Text("\(viewModel.character.currentXP) / \(PlayerCharacter.xpPerLevel) XP")
+                    if viewModel.character.isMaxLevel {
+                        Text("MAX")
+                            .font(.largeTitle.bold())
+                            .foregroundColor(.orange)
+                        Text("Lv. \(viewModel.character.level) · 최고 레벨 달성!")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    } else {
+                        Text("Lv. \(viewModel.character.level)")
+                            .font(.largeTitle.bold())
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            ProgressView(value: viewModel.character.progress)
+                                .tint(.accentColor)
+                            Text("\(viewModel.character.currentXP) / \(viewModel.character.xpToNextLevel) XP")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 40)
                     }
-                    .padding(.horizontal, 40)
 
                     statsCard
                         .padding(.horizontal, 24)

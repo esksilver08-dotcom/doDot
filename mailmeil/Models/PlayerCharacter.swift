@@ -7,22 +7,51 @@ struct PlayerCharacter: Codable, Equatable {
     var level: Int = 1
     var currentXP: Int = 0
 
-    static let xpPerLevel = 100
+    static let maxLevel = 30
+
+    /// XP needed to go from `level` to `level + 1`. Grows with level so
+    /// later levels take meaningfully longer than early ones.
+    static func xpRequired(for level: Int) -> Int {
+        100 + (level - 1) * 20
+    }
+
+    /// Total XP needed to go from level 1 up through (but not past) `level`.
+    static func cumulativeXP(throughLevel level: Int) -> Int {
+        guard level > 1 else { return 0 }
+        return (1..<level).reduce(0) { $0 + xpRequired(for: $1) }
+    }
+
+    var isMaxLevel: Bool { level >= PlayerCharacter.maxLevel }
+
+    /// XP needed to reach the next level; meaningless once maxed.
+    var xpToNextLevel: Int {
+        PlayerCharacter.xpRequired(for: level)
+    }
 
     var progress: Double {
-        Double(currentXP) / Double(PlayerCharacter.xpPerLevel)
+        isMaxLevel ? 1 : Double(currentXP) / Double(xpToNextLevel)
+    }
+
+    /// Lifetime XP implied by level + currentXP, given the escalating curve.
+    var totalXPEarned: Int {
+        PlayerCharacter.cumulativeXP(throughLevel: level) + currentXP
     }
 
     /// Returns how many levels were gained, so callers can trigger a
-    /// level-up celebration only when it actually happens.
+    /// level-up celebration only when it actually happens. No-ops once
+    /// `isMaxLevel`.
     @discardableResult
     mutating func addXP(_ amount: Int) -> Int {
+        guard !isMaxLevel else { return 0 }
         currentXP += amount
         var levelsGained = 0
-        while currentXP >= PlayerCharacter.xpPerLevel {
-            currentXP -= PlayerCharacter.xpPerLevel
+        while !isMaxLevel && currentXP >= xpToNextLevel {
+            currentXP -= xpToNextLevel
             level += 1
             levelsGained += 1
+        }
+        if isMaxLevel {
+            currentXP = 0
         }
         return levelsGained
     }
@@ -37,7 +66,7 @@ struct PlayerCharacter: Codable, Equatable {
                 return
             }
             level -= 1
-            currentXP += PlayerCharacter.xpPerLevel
+            currentXP += PlayerCharacter.xpRequired(for: level)
         }
     }
 }

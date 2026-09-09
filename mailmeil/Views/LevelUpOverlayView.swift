@@ -39,9 +39,9 @@ struct LevelUpOverlayView: View {
             }
 
             VStack(spacing: 8) {
-                Text("🎉")
+                Text(newLevel >= PlayerCharacter.maxLevel ? "🏆" : "🎉")
                     .font(.system(size: 56))
-                Text("레벨 업!")
+                Text(newLevel >= PlayerCharacter.maxLevel ? "만렙 달성!" : "레벨 업!")
                     .font(.title.bold())
                     .foregroundColor(.white)
                 Text("Lv. \(newLevel)")

@@ -79,7 +79,10 @@ mailmeilUITests/               # XCUITest UI tests
 - **XP flow**: completing a todo or a routine calls
   `PlayerCharacter.addXP(_:)` with the item's `Difficulty.xp` (쉬움=10,
   보통=30, 어려움=50); un-completing calls `removeXP(_:)` to reverse it.
-  Leveling is a flat `xpPerLevel = 100` per level — no escalating curve yet.
+  XP needed per level escalates (`xpRequired(for:) = 100 + (level-1)*20`),
+  capped at `maxLevel = 30` — `addXP` no-ops once `isMaxLevel`, and
+  `CharacterView`/`LevelUpOverlayView` swap to a "MAX" / "만렙 달성!"
+  display instead of the usual level number + XP bar.
 - **Todos** (`TodoItem`) are one-off, dated (`date`), and shown for "today"
   only (`AppViewModel.todaysTodos`), split into `.morning`/`.afternoon`/`.evening`.
 - **Routines** repeat on selected weekdays (`repeatDays`, 0=Monday...6=Sunday,

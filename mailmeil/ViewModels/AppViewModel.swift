@@ -138,11 +138,7 @@ final class AppViewModel: ObservableObject {
         }
     }
 
-    /// Lifetime XP implied by the character's current level/XP (no separate
-    /// ledger needed — leveling is a flat `xpPerLevel` per level).
-    var totalXPEarned: Int {
-        (character.level - 1) * PlayerCharacter.xpPerLevel + character.currentXP
-    }
+    var totalXPEarned: Int { character.totalXPEarned }
 
     var thisWeekCompletions: Int {
         let calendar = Calendar.current
