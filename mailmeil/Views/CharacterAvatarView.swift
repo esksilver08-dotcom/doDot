@@ -12,12 +12,12 @@ private struct StudyStage {
 
 private func studyStage(for level: Int) -> StudyStage {
     switch level {
-    case 1: return StudyStage(number: 1, label: "공부 허수")
-    case 2...3: return StudyStage(number: 2, label: "학습 입문자")
-    case 4...5: return StudyStage(number: 3, label: "학구적 몰입")
-    case 6...7: return StudyStage(number: 4, label: "지식 체계화")
-    case 8...9: return StudyStage(number: 5, label: "학문 융합가")
-    case 10...11: return StudyStage(number: 6, label: "탐구의 완성")
+    case 1...5: return StudyStage(number: 1, label: "공부 허수")
+    case 6...10: return StudyStage(number: 2, label: "학습 입문자")
+    case 11...15: return StudyStage(number: 3, label: "학구적 몰입")
+    case 16...20: return StudyStage(number: 4, label: "지식 체계화")
+    case 21...25: return StudyStage(number: 5, label: "학문 융합가")
+    case 26...29: return StudyStage(number: 6, label: "탐구의 완성")
     default: return StudyStage(number: 7, label: "학문의 초월자")
     }
 }
@@ -45,7 +45,7 @@ struct CharacterAvatarView: View {
 
 #Preview {
     VStack(spacing: 16) {
-        ForEach([1, 3, 5, 7, 9, 11, 13], id: \.self) { lv in
+        ForEach([1, 6, 11, 16, 21, 26, 30], id: \.self) { lv in
             CharacterAvatarView(level: lv)
         }
     }

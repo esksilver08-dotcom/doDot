@@ -94,8 +94,8 @@ mailmeilUITests/               # XCUITest UI tests
   per stage) drawn specifically for this progression: 공부 허수 → 학습
   입문자 → 학구적 몰입 → 지식 체계화 → 학문 융합가 → 탐구의 완성 → 학문의
   초월자. `CharacterAvatarView`'s private `studyStage(for:)` maps level to a
-  stage (2 levels per stage from level 2 on, capped at stage 7 from level 12),
-  so leveling up actually swaps the artwork rather than re-tinting one image.
+  stage (Lv 1-5/6-10/11-15/16-20/21-25/26-29, stage 7 from Lv 30+), so
+  leveling up actually swaps the artwork rather than re-tinting one image.
   Replaced once already with a higher-quality single-variant-per-stage
   source image (~400-590px native per panel) once the first source's
   linework read as muddy even after correction. Each imageset's @1x/@2x/@3x
