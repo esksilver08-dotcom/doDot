@@ -9,10 +9,34 @@ import SwiftUI
 
 @main
 struct mailmeilApp: App {
+    @StateObject private var viewModel = AppViewModel()
+
     var body: some Scene {
         WindowGroup {
-            GoalsHomeView()
-                .environmentObject(GoalsViewModel())
+            TabView {
+                TodayView()
+                    .tabItem {
+                        Label("오늘", systemImage: "checklist")
+                    }
+                RoutineView()
+                    .tabItem {
+                        Label("루틴", systemImage: "repeat")
+                    }
+                CharacterView()
+                    .tabItem {
+                        Label("캐릭터", systemImage: "person.fill")
+                    }
+            }
+            .environmentObject(viewModel)
+            .overlay {
+                if let event = viewModel.levelUpEvent {
+                    LevelUpOverlayView(newLevel: event.newLevel) {
+                        viewModel.levelUpEvent = nil
+                    }
+                    .transition(.opacity)
+                    .zIndex(1)
+                }
+            }
         }
     }
 }
